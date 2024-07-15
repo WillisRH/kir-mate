@@ -308,7 +308,7 @@ export default function Home() {
         <hr className="line"></hr>
         <div className='mx-auto text-center space-x-5 grid-cols-2 grid'>
         <div className=''>
-        <Link href={"https://www.instagram.com/inkirdible/"} className="text-gray-700 text-7xl slide-in-bottom font-logos ">
+        <Link href={"https://www.instagram.com/inkirdible/"} className="text-gray-700 text-7xl slide-in-bottom font-logos">
 Q
         </Link>
         <h1 className='mt-2'>@inkirdible</h1>
