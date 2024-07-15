@@ -2,20 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Logos";
+  src: url("../public/needed.ttf") format("truetype");
+  font-style: normal;
+}
+
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --tw-bg-opacity: 1;
+  background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
+  /* box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5); */
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+.full-screen-height {
+  height: 100vh; /* Full viewport height */
+  position: relative;
 }
-
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -30,4 +31,98 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+@keyframes slideInBottom {
+  0% {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(100vh) scale(1.5);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-10vh) scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.slide-in-bottom {
+  animation: slideInBottom 1.2s forwards;
+}
+
+.centered-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  text-align: center;
+}
+
+.floating-emoji {
+  position: absolute;
+  animation: floatUp 5s infinite, fadeInOut 5s infinite;
+  font-size: 3rem; /* Larger size */
+}
+
+
+.pixel-button {
+  background-color: rgb(153, 255, 0);
+  color: #000;
+  font-family: 'Press Start 2P';
+  border: 2px solid #000;
+  box-shadow: 2px 2px #000;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.pixel-button-d {
+  background-color: yellow;
+  color: #000;
+  font-family: 'Press Start 2P';
+  border: 2px solid #000;
+  box-shadow: 2px 2px #000;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.pixel-button-d:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 4px #000;
+}
+
+.pixel-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 4px #000;
+}
+
+hr {
+  @apply border-black;
+}
+
+.line {
+  @apply w-[300px] h-1 my-5 mx-auto border-2 rounded-sm;
 }
