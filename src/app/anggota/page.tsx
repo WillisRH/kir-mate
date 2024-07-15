@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
+import logo from '@/public/logo.png';
+import Image from "next/image";
 
 interface PendaftaranKIR {
   _id: string;
@@ -156,7 +158,16 @@ const AnggotaPage = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-center">Daftar Anggota KIR</h1>
+       <Image
+                alt="logo"
+                src={logo}
+                width={200}
+                height={200}
+                style={{ backgroundColor: "#383433" }}
+                className="mx-auto my-5 rounded-full aspect-square object-contain"
+            />
+      <h1 className="text-2xl font-bold mt-2 mb-2 text-center">Data Anggota KIR</h1>
+      <p className="text-center mb-8">There are <span className="underline">{anggota.length}</span> registered students in the kir-mate database.</p>
       <div className="flex justify-left mb-4">
       <button
   onClick={() => downloadExcel(viewMode === 'table' ? filteredAnggota : filteredAnggotas)}

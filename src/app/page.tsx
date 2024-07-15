@@ -8,6 +8,7 @@ import uneso from '@/public/uneso.png';
 import kir from '@/public/kir.png';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 import bg1 from '@/public/bg1.png'
 import bg2 from '@/public/bg2.png'
@@ -17,6 +18,7 @@ import bg5 from '@/public/bg5.png'
 import bg6 from '@/public/bg6.png'
 import bg7 from '@/public/bg7.png'
 import Link from 'next/link';
+const angkatan_sekarang: number = parseInt(process.env.NEXT_PUBLIC_ANGKATAN_SEKARANG ?? "9999999999999999", 10);
 
 export default function Home() {
   const [isContentVisible, setContentVisible] = useState(false);
@@ -26,6 +28,7 @@ export default function Home() {
   const [scrollSpeed, setScrollSpeed] = useState(0);
   const router = useRouter();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [counter, setCounter] = useState(0);
 
   const handleNextImage = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -46,6 +49,7 @@ export default function Home() {
     { src: bg6, description: "KEGIATAN LOMBA" },
     { src: bg7, description: "-" },
   ];
+
 
   const handleClick = () => {
     setContentVisible(true);
@@ -78,6 +82,8 @@ export default function Home() {
         return delta;
       };
     })();
+
+
 
     const handleScroll = () => {
       const speed = checkScrollSpeed();
@@ -117,6 +123,27 @@ export default function Home() {
 
     const initialEmojiPositions = [...Array(5)].map(generateRandomPosition);
     setEmojiPositions(initialEmojiPositions);
+
+
+    
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get("/api");
+      const data = response.data.data;
+
+
+      // Set the counter to the length of the data
+      setCounter(data.length);
+    } catch (err) {
+      // Handle the error here
+    } finally {
+      // Do any final operations here
+    }
+  };
+
+
+    fetchData();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -337,6 +364,12 @@ L
           {!isContentVisible && (
             <p className="text-sm text-gray-500 text-xl">Surat terbuka untuk kalian, calon scientist!</p>
           )}
+          {!isContentVisible && (
+            <p className="mt-4 p-4 bg-gray-100 shadow-lg rounded text-center text-sm">
+            Ayo bergabung dengan <span className="underline">{counter + angkatan_sekarang}</span> anggota lainnya!
+          </p>
+          )}
+
           {!isContentVisible && showEmojis && (
             <button
               onClick={handleClick}
