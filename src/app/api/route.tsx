@@ -6,7 +6,7 @@ import axios from 'axios';
 const uri = process.env.MONGODB_URI; // Ensure your MongoDB connection string is in the environment variables
 const waapi = process.env.NEXT_PUBLIC_API_LINK;
 
-const connectToDatabase = async () => {
+export const connectToDatabase = async () => {
   if (!uri) {
     throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
   }

@@ -2,8 +2,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
-import logo from '@/public/logo.png';
+import logo from '@/public/logofull.png';
 import Image from "next/image";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFileExcel, faTable, faThLarge, faSortAlphaDown, faSortNumericDown, faSortAmountDown } from '@fortawesome/free-solid-svg-icons';
+
 
 interface PendaftaranKIR {
   _id: string;
@@ -49,6 +52,7 @@ const AnggotaPage = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("table");
+  const [sortOption, setSortOption] = useState("timestamp"); // New state for sorting option
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,6 +79,10 @@ const AnggotaPage = () => {
     });
   };
 
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortOption(e.target.value);
+  };
+
   const downloadExcel = (data: PendaftaranKIR[]) => {
     const transformedData = data.map((item) => {
       const date = dateFromObjectId(item._id);
@@ -97,7 +105,20 @@ const AnggotaPage = () => {
     XLSX.writeFile(workbook, "pendaftaran_kir.xlsx");
   };
 
-  const filteredAnggota = anggota.filter((member) => {
+  const sortData = (data: PendaftaranKIR[]) => {
+    switch (sortOption) {
+      case "name":
+        return data.sort((a, b) => a.name.localeCompare(b.name));
+      case "timestamp":
+        return data.sort((a, b) => dateFromObjectId(a._id).getTime() - dateFromObjectId(b._id).getTime());
+      case "class":
+        return data.sort((a, b) => a.class.localeCompare(b.class));
+      default:
+        return data;
+    }
+  };
+
+  const filteredAnggota = sortData(anggota.filter((member) => {
     const date = dateFromObjectId(member._id);
     const timestamp = `${formatDate(date)} ${formatTime(date)}`.toLowerCase();
     return (
@@ -109,9 +130,9 @@ const AnggotaPage = () => {
       member.eskul.join(", ").toLowerCase().includes(searchQueries.eskul.toLowerCase()) &&
       timestamp.includes(searchQueries.timestamp.toLowerCase())
     );
-  });
+  }));
 
-  const filteredAnggotas = anggota.filter((member) => {
+  const filteredAnggotas = sortData(anggota.filter((member) => {
     const fullName = member.name.toLowerCase();
     const phoneNumber = member.phoneNumber.toLowerCase();
     const classField = member.class.toLowerCase();
@@ -119,7 +140,7 @@ const AnggotaPage = () => {
     const eskul = member.eskul.join(", ").toLowerCase();
     const timestamp = `${formatDate(dateFromObjectId(member._id))} ${formatTime(dateFromObjectId(member._id))}`.toLowerCase();
     const searchTerm = searchQuery.toLowerCase();
-  
+
     return (
       fullName.includes(searchTerm) ||
       phoneNumber.includes(searchTerm) ||
@@ -128,17 +149,17 @@ const AnggotaPage = () => {
       eskul.includes(searchTerm) ||
       timestamp.includes(searchTerm)
     );
-  })
+  }));
 
   function getFirstName(fullName: String) {
     // Handle edge cases (empty string, single word)
     if (!fullName || !fullName.trim()) {
       return "";
     }
-  
+
     // Split on whitespace, considering multiple spaces and non-breaking spaces
     const nameParts = fullName.trim().split(/\s+/);
-  
+
     // Return the first non-empty part (handles names with leading/trailing spaces)
     return nameParts.find(part => part) || "";
   }
@@ -158,30 +179,49 @@ const AnggotaPage = () => {
 
   return (
     <div className="container mx-auto p-4">
-       <Image
-                alt="logo"
-                src={logo}
-                width={200}
-                height={200}
-                style={{ backgroundColor: "#383433" }}
-                className="mx-auto my-5 rounded-full aspect-square object-contain"
-            />
+      <Image
+        alt="logo"
+        src={logo}
+        width={200}
+        height={200}
+        style={{ backgroundColor: "#383433" }}
+        className="mx-auto my-5 rounded-full aspect-square object-contain"
+      />
       <h1 className="text-2xl font-bold mt-2 mb-2 text-center">Data Anggota KIR</h1>
       <p className="text-center mb-8">There are <span className="underline">{anggota.length}</span> registered students in the kir-mate database.</p>
       <div className="flex justify-left mb-4">
-      <button
-  onClick={() => downloadExcel(viewMode === 'table' ? filteredAnggota : filteredAnggotas)}
-  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
->
-  Export to XLS
-</button>
-
+        <button
+          onClick={() => downloadExcel(viewMode === 'table' ? filteredAnggota : filteredAnggotas)}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded flex items-center"
+        >
+          <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+          {/* Export to XLS */}
+        </button>
         <button
           onClick={() => setViewMode(viewMode === "table" ? "card" : "table")}
-          className="ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          className="ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-8 rounded flex items-center"
         >
-          {viewMode === "table" ? "View as Cards" : "View as Table"}
+          <FontAwesomeIcon icon={viewMode === "table" ? faThLarge : faTable} className="mr-2" />
+          {/* {viewMode === "table" ? "View as Cards" : "View as Table"} */}
         </button>
+        <select
+          value={sortOption}
+          onChange={handleSortChange}
+          className="ml-4 bg-white border rounded py-2 px-2"
+        >
+          <option value="name">
+            <FontAwesomeIcon icon={faSortAlphaDown} className="mr-2" />
+            Sort by Name
+          </option>
+          <option value="timestamp">
+            <FontAwesomeIcon icon={faSortNumericDown} className="mr-2" />
+            Sort by Timestamp
+          </option>
+          <option value="class">
+            <FontAwesomeIcon icon={faSortAmountDown} className="mr-2" />
+            Sort by Class
+          </option>
+        </select>
       </div>
       <div className="overflow-x-auto">
         {viewMode === "table" ? (
@@ -305,56 +345,56 @@ const AnggotaPage = () => {
         ) : (
           <div className="flex flex-wrap justify-center">
             <div className="w-full px-3 mb-6 md:mb-0">
-        <input
-          className="w-full border rounded-md p-2"
-          type="text"
-          placeholder="Search..."
-          value={searchQuery}
-          onChange={handleSearchChangecard}
-        />
-      </div>
-      <div className="flex flex-wrap justify-center">
-        {filteredAnggotas.map((member, index) => {
-          const date = dateFromObjectId(member._id);
-          return (
-            <div
-              key={member._id}
-              className="bg-white rounded-lg shadow-lg p-4 m-2 w-full sm:w-1/2 lg:w-1/3"
-            >
-              <h2 className="text-2xl font-bold mb-2">{getFirstName(member.name)}</h2>
-              {/* <p><strong>ID:</strong> {member._id}</p> */}
-              <p><strong>Nama Lengkap:</strong> {member.name}</p>
-              <p><strong>Nomor Telepon:</strong> {member.phoneNumber}</p>
-              <p><strong>Kelas:</strong> {member.class}</p>
-              <p><strong>Alasan:</strong> {member.alasan}</p>
-              {member.eskul.length > 0 && (
-  <>
-    <p><strong>Eskul (Selain KIR):</strong></p>
-    <div className="flex flex-wrap">
-      {member.eskul.map((eskul, index) => (
-        <span
-          key={index}
-          className="inline-block bg-gray-200 rounded-e px-3 py-1 text-sm font-semibold text-gray-700 m-1"
-        >
-          {eskul}
-        </span>
-      ))}
-    </div>
-  </>
-)}
-
-              <div className="mt-2">
-                <div className="inline-block bg-gray-200 rounded-lg px-3 py-1 text-sm font-semibold text-gray-700 m-1">
-                  {formatDate(date)}
-                </div>
-                <div className="inline-block bg-gray-200 rounded-lg px-3 py-1 text-sm font-semibold text-gray-700 m-1">
-                  {formatTime(date)}
-                </div>
-              </div>
+              <input
+                className="w-full border rounded-md p-2"
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={handleSearchChangecard}
+              />
             </div>
-          );
-        })}
-      </div>
+            <div className="flex flex-wrap justify-center">
+              {filteredAnggotas.map((member, index) => {
+                const date = dateFromObjectId(member._id);
+                return (
+                  <div
+                    key={member._id}
+                    className="bg-white rounded-lg shadow-lg p-4 m-2 w-full sm:w-1/2 lg:w-1/3"
+                  >
+                    <h2 className="text-2xl font-bold mb-2">{getFirstName(member.name)}</h2>
+                    {/* <p><strong>ID:</strong> {member._id}</p> */}
+                    <p><strong>Nama Lengkap:</strong> {member.name}</p>
+                    <p><strong>Nomor Telepon:</strong> {member.phoneNumber}</p>
+                    <p><strong>Kelas:</strong> {member.class}</p>
+                    <p><strong>Alasan:</strong> {member.alasan}</p>
+                    {member.eskul.length > 0 && (
+                      <>
+                        <p><strong>Eskul (Selain KIR):</strong></p>
+                        <div className="flex flex-wrap">
+                          {member.eskul.map((eskul, index) => (
+                            <span
+                              key={index}
+                              className="inline-block bg-gray-200 rounded-e px-3 py-1 text-sm font-semibold text-gray-700 m-1"
+                            >
+                              {eskul}
+                            </span>
+                          ))}
+                        </div>
+                      </>
+                    )}
+
+                    <div className="mt-2">
+                      <div className="inline-block bg-gray-200 rounded-lg px-3 py-1 text-sm font-semibold text-gray-700 m-1">
+                        {formatDate(date)}
+                      </div>
+                      <div className="inline-block bg-gray-200 rounded-lg px-3 py-1 text-sm font-semibold text-gray-700 m-1">
+                        {formatTime(date)}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
