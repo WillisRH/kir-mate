@@ -57,3 +57,23 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+
+export async function GET() {
+  await connectToDatabase();
+
+  try {
+    const contests = await KeteranganKehadiran.find({});
+    return NextResponse.json({ success: true, data: contests }, { status: 200 });
+  } catch (error) {
+    console.error(error);
+
+    // Cast error to Error object to safely access the message property
+    if (error instanceof Error) {
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
+
+    // Handle cases where the error might not be an instance of Error
+    return NextResponse.json({ success: false, error: 'An unexpected error occurred' }, { status: 500 });
+  }
+}

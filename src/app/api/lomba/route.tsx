@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     await newContest.save();
     return NextResponse.json({ success: true, data: newContest }, { status: 201 });
-  } catch (error) {
+  } catch (error) { 
     console.error(error);
 
     // Cast error to Error object to safely access the message property
