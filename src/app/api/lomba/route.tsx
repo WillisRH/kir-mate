@@ -1,6 +1,7 @@
 import Contest from '@/models/contest';
+import { connectToDatabase } from '@/utils/connectToDatabase';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '../route';
+
 
 export async function POST(req: NextRequest) {
   await connectToDatabase();

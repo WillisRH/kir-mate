@@ -2,20 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import PendaftaranKIR from '../../models/PendaftaranKIR';
 import axios from 'axios';
+import { connectToDatabase } from '@/utils/connectToDatabase';
 
 const uri = process.env.MONGODB_URI; // Ensure your MongoDB connection string is in the environment variables
 const waapi = process.env.NEXT_PUBLIC_API_LINK;
 
-export const connectToDatabase = async () => {
-  if (!uri) {
-    throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
-  }
 
-  if (mongoose.connection.readyState === 0) {
-    await mongoose.connect(uri);
-    console.log('Connected to MongoDB');
-  }
-};
 
 // const transformPhoneNumber = (phoneNumber: string): string => {
 //   if (phoneNumber.startsWith('0')) {
