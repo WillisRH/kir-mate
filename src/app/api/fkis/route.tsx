@@ -11,8 +11,7 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
 
     const body = await req.json();
-    const { name, userId, izin, sakit, keterangan } = body;
-
+    const { name, userId, studentclass, izin, sakit, keterangan } = body;
     console.log(body);
 
     // Validate input
@@ -29,6 +28,7 @@ export async function POST(req: NextRequest) {
     // Prepare the data to save
     const newEntryData: any = {
       name,
+      class: studentclass,
       status: {
         izin: !!izin,
         sakit: !!sakit,

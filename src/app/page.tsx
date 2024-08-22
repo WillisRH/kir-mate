@@ -243,51 +243,52 @@ export default function Home() {
       </div> */}
 
 <div className="absolute inset-0 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
-          {images.map((src, index) => (
-            <div key={index} className="relative w-full h-64">
-              <Image
-                src={src.src}
-                alt={`Image ${index + 1}`}
-                layout="fill"
-                objectFit="cover"
-                className="opacity-20 z-[-1]"
-                
-              />
-            </div>  
-          ))}
-        </div>
+  {images.map((src, index) => (
+    <div key={index} className="relative w-full h-64">
+      <Image
+        src={src.src}
+        alt={`Image ${index + 1}`}
+        layout="fill"
+        objectFit="cover"
+        className="opacity-20 z-[-1]"
+      />
+    </div>  
+  ))}
+</div>
 
-      <h1 className='mb-5'>Bosan dengan pelajaran di kelas yang monoton? Ingin merasakan sensasi belajar sambil bereksperimen dan berpetualang? KIR hadir untuk membantumu! Lebih dari sekadar ekstrakulikuler sains, KIR adalah wadah untuk mengembangkan kreativitas, inovasi, dan kepemimpinanmu. Berikut ini adalah potret keseruan kegiatan dalam eskul KIR!</h1>
-        <div className=" w-full h-64 md:h-96 lg:h-128">
-          
-          <div className="relative w-full h-full">
-            <Image
-              src={images[currentImageIndex].src}
-              alt={`Image ${currentImageIndex + 1}`}
-              layout="fill"
-              className='w-max'
-              objectFit="contain"
-              // style={{ transform: "rotate3d(0, 1, 0.5, 3.142rad)" }}
-            />
-          </div>
-        </div>
-        <p className="mt-12 lg:mt-16 text-xl md:text-2xl text-black z-10 hover:rotate[-60] transition-transform" >
-          {images[currentImageIndex].description}
-        </p>
-        <div className="mt-6 space-x-4 z-10">  
-          <button
-            onClick={handlePreviousImage}
-            className="px-4 py-2 bg-white text-indigo-700 rounded-md shadow-md hover:bg-gray-200 transition duration-300"
-          >
-            Previous Image
-          </button>
-          <button
-            onClick={handleNextImage}
-            className="px-4 py-2 bg-white text-indigo-700 rounded-md shadow-md hover:bg-gray-200 transition duration-300"
-          >
-            Next Image
-          </button>
-        </div>
+<h1 className='mb-5'>
+  Bosan dengan pelajaran di kelas yang monoton? Ingin merasakan sensasi belajar sambil bereksperimen dan berpetualang? KIR hadir untuk membantumu! Lebih dari sekadar ekstrakulikuler sains, KIR adalah wadah untuk mengembangkan kreativitas, inovasi, dan kepemimpinanmu. Berikut ini adalah potret keseruan kegiatan dalam eskul KIR!
+</h1>
+
+<div className="relative w-full h-64 md:h-96 lg:h-128">
+  <Image
+    src={images[currentImageIndex].src}
+    alt={`Image ${currentImageIndex + 1}`}
+    layout="fill"
+    className="w-max"
+    objectFit="contain"
+  />
+
+  <div className="absolute inset-0 flex justify-between items-center px-4">
+    <button
+      onClick={handlePreviousImage}
+      className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition duration-300 "
+    >
+      &lt;&lt;
+    </button>
+    <button
+      onClick={handleNextImage}
+      className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition duration-300"
+    >
+      &gt;&gt;
+    </button>
+  </div>
+</div>
+
+<p className="mt-12 lg:mt-16 text-xl md:text-2xl text-black z-10 transition-transform">
+  {images[currentImageIndex].description}
+</p>
+
           <h1 className='mt-8'>Ayo Tunggu Apalagi, Hey Kamu Scientist!
           Dunia menanti ide-ide brilianmu! Di KIR, kamu akan menemukan ruang untuk mengembangkan bakat dan minatmumu di bidang sains, teknologi, dan penelitian.</h1>
         
@@ -408,7 +409,7 @@ L
       </header>
 
       {isContentVisible && currentPage >= 0 && currentPage < headers.length && (
-        <main className="slide-in-bottom">
+        <main className="slide-in-bottom ">
           {pagesContent[currentPage]}
         </main>
       )}
@@ -422,7 +423,7 @@ L
           >
             &lt;&lt;
           </button>
-          <p className="text-center">{currentPage + 1} / {headers.length}</p>
+          <p className="px-4 py-2 text-center bg-gray-500 text-white rounded">{currentPage + 1} / {headers.length}</p>
           <button
             onClick={handleNext}
             className="px-4 py-2 bg-gray-500 text-white rounded"
@@ -433,13 +434,13 @@ L
         </div>
       )}
       <div className={`fixed ${isContentVisible ? 'bottom-16' : 'bottom-2'} left-4 bg-white p-2 rounded shadow`}>
-  {scrollSpeed > 20 ? (
+  {/* {scrollSpeed > 20 ? (
     <p style={{ color: 'red' }}>You're scrolling too fast!</p>
   ) : (
     <p style={{ color: 'black' }}>
       Scroll Velocity: {scrollSpeed.toFixed(2)} px/ms
     </p>
-  )}
+  )} */}
 </div>
 
 

@@ -26,8 +26,8 @@ function Pendaftaran() {
     phoneNumber: '',
     class: '',
     agreement: false,
-    alasan: '', // New state for alasan
-    eskul: [], // New state for eskul
+    alasan: '', 
+    eskul: [], 
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);

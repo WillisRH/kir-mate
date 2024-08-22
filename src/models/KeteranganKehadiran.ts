@@ -1,5 +1,3 @@
-// src/models/KeteranganKehadiran.ts
-
 import mongoose, { Schema, Document, model } from "mongoose";
 
 export interface IKeteranganKehadiran extends Document {
@@ -10,6 +8,7 @@ export interface IKeteranganKehadiran extends Document {
     sakit: boolean;
   };
   keterangan: string;
+  class?: string; // Add this line
   submittedAt: Date;
 }
 
@@ -21,6 +20,7 @@ const KeteranganKehadiranSchema: Schema = new Schema({
     sakit: { type: Boolean, required: true },
   },
   keterangan: { type: String, required: true },
+  class: { type: String }, // Add this line
   submittedAt: { type: Date, default: Date.now },
 });
 
