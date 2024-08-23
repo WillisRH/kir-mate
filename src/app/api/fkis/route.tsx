@@ -22,12 +22,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const namefix = name.toUpperCase();
+
     // Validate ObjectId
     const isValidObjectId = mongoose.isValidObjectId(userId);
     
     // Prepare the data to save
     const newEntryData: any = {
-      name,
+      name: namefix,
       class: studentclass,
       status: {
         izin: !!izin,
@@ -74,6 +76,28 @@ export async function GET() {
     }
 
     // Handle cases where the error might not be an instance of Error
+    return NextResponse.json({ success: false, error: 'An unexpected error occurred' }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    await connectToDatabase();
+
+    // Delete all documents from the KeteranganKehadiran collection
+    await KeteranganKehadiran.deleteMany({});
+
+    return NextResponse.json(
+      { message: "All data deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting data:", error);
+    
+    if (error instanceof Error) {
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
+
     return NextResponse.json({ success: false, error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

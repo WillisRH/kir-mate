@@ -3,10 +3,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileExcel, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
-import { formatDistanceToNow, parseISO, format as formatDateFns } from 'date-fns'; // Import additional date-fns functions
+import { faFileExcel, faChevronDown, faChevronUp, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { formatDistanceToNow, parseISO, format as formatDateFns } from 'date-fns'; 
 import logo from '@/public/logofull.png';
 import Image from "next/image";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
+import swal from 'sweetalert';
 
 type KeteranganKehadiran = {
   _id: string;
@@ -24,9 +27,18 @@ const FkisListPage = () => {
   const [data, setData] = useState<KeteranganKehadiran[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [sortOption, setSortOption] = useState<string>("submittedAt");
+  const [sortOption, setSortOption] = useState<string>("class");
   const [expandedName, setExpandedName] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [secretKey, setSecretKey] = useState<string>("");
+  const [isKeyError, setIsKeyError] = useState<boolean>(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [hasFailed, setHasFailed] = useState<boolean>(false);
+
+  const router = useRouter();
+
+  const secretKeyEnv = process.env.NEXT_PUBLIC_SECRET_KEY
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,6 +51,12 @@ const FkisListPage = () => {
         setIsLoading(false);
       }
     };
+
+
+    const failed = Cookies.get("fkis_list_failed");
+    if (failed) {
+      setHasFailed(true);
+    }
 
     fetchData();
   }, []);
@@ -53,16 +71,21 @@ const FkisListPage = () => {
 
   const aggregateData = (data: KeteranganKehadiran[]) => {
     const aggregated: { [key: string]: { countIzin: number; countSakit: number; class: string; keterangan: string; submittedAt: string; details: KeteranganKehadiran[] } } = {};
-
+  
     data.forEach(item => {
       if (!aggregated[item.name]) {
         aggregated[item.name] = { countIzin: 0, countSakit: 0, class: item.class, keterangan: item.keterangan, submittedAt: item.submittedAt, details: [] };
       }
       if (item.status.izin) aggregated[item.name].countIzin += 1;
       if (item.status.sakit) aggregated[item.name].countSakit += 1;
+  
+      if (new Date(item.submittedAt) > new Date(aggregated[item.name].submittedAt)) {
+        aggregated[item.name].submittedAt = item.submittedAt;
+      }
+  
       aggregated[item.name].details.push(item);
     });
-
+  
     return Object.keys(aggregated).map(name => ({
       name,
       class: aggregated[name].class,
@@ -73,12 +96,13 @@ const FkisListPage = () => {
       details: aggregated[name].details,
     }));
   };
+  
 
   const formatDate = (dateString: string) => {
     const date = parseISO(dateString);
     const relativeTime = formatDistanceToNow(date, { addSuffix: true });
     const exactDate = formatDateFns(date, 'dd/MM/yyyy');
-    return `${relativeTime} (${exactDate})`; // Combine both relative time and exact date
+    return `${relativeTime} (${exactDate})`; 
   };
 
   const sortData = (data: any[]) => {
@@ -115,8 +139,68 @@ const FkisListPage = () => {
     XLSX.writeFile(workbook, "keterangan_kehadiran.xlsx");
   };
 
+  // const handleDumpAll = async () => {
+  //   if (secretKey === "your-secret-key") {
+  //     try {
+  //       await axios.delete("/api/fkis");
+  //       setData([]);
+  //       setIsModalOpen(false);
+  //       setIsKeyError(false);
+  //     } catch (err) {
+  //       setError("Failed to delete data");
+  //     }
+  //   } else {
+  //     setIsKeyError(true);
+  //   }
+  // };
+
+  const handleDumpAll = async () => {
+    if (secretKey === secretKeyEnv) {
+      await axios.delete("/api/fkis");
+        setData([]);
+        setIsModalOpen(false);
+        setIsKeyError(false);
+        swal({
+          title: "Success!",
+          text: "Sukses menghapus semua data kehadiran!",
+          icon: "success",
+        });
+      setIsModalOpen(false);
+    } else {
+      setFailedAttempts(prevAttempts => {
+        const newAttempts = prevAttempts + 1;
+        if (newAttempts >= 5) {
+          Cookies.set("fkis_list_failed", "true", { expires: 1 });
+          setHasFailed(true)
+          swal({
+            title: "Failed",
+            text: "Kamu gagal memasukkan password sebanyak 5 kali!",
+            icon: "error",
+          }).then(() => {
+            // Set a cookie to indicate that the form has been submitted
+             // Expires in 1 day
+            router.push("/")
+  
+            // setTimeout(() => {
+            //   window.open('https://chat.whatsapp.com/EuAKD4nhcqwAhjG3frP1XF', '_blank');
+            // }, 1000); 
+          });
+          // router.push('/')
+        }
+        return newAttempts;
+      });
+    }
+  };
+
   if (isLoading) return <div className="text-center">Loading...</div>;
   if (error) return <div className="text-center text-red-500">{error}</div>;
+  if (hasFailed) {
+    return (
+      <div className="max-w-xl mx-auto p-6 text-center">
+        Blacklisted for 1 day!
+      </div>
+    );
+  }
 
   const aggregatedData = sortData(aggregateData(data)).filter(entry =>
     entry.name.toLowerCase().includes(searchQuery)
@@ -153,13 +237,22 @@ const FkisListPage = () => {
             <option value="submittedAt">Sort by Submitted At</option>
           </select>
         </div>
-        <button
-          onClick={downloadExcel}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
-        >
-          <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
-          Export to XLS
-        </button>
+        <div className="flex space-x-4">
+          <button
+            onClick={downloadExcel}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
+          >
+            <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+            Export to XLS
+          </button>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center"
+          >
+            <FontAwesomeIcon icon={faTrash} className="mr-2" />
+            Dump All
+          </button>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full table-auto">
@@ -169,25 +262,20 @@ const FkisListPage = () => {
               <th className="border px-2 md:px-4 py-2 text-sm md:text-base">Kelas</th>
               <th className="border px-2 md:px-4 py-2 text-sm md:text-base">Izin</th>
               <th className="border px-2 md:px-4 py-2 text-sm md:text-base">Sakit</th>
-              {/* <th className="border px-2 md:px-4 py-2 text-sm md:text-base">Keterangan</th> */}
               <th className="border px-2 md:px-4 py-2 text-sm md:text-base">Submitted At</th>
             </tr>
           </thead>
           <tbody>
             {aggregatedData.map((entry) => (
               <>
-                <tr key={entry.name} onClick={() => handleRowClick(entry.name)} className="cursor-pointer">
-                  <td className="border px-2 md:px-4 py-2 text-sm md:text-base flex items-center">
-                    {entry.name}
-                    <FontAwesomeIcon
+                <tr key={entry.name} onClick={() => handleRowClick(entry.name)} className="cursor-pointer hover:bg-gray-100">
+                  <td className="border px-2 md:px-4 py-2 text-sm md:text-base">{entry.name} <FontAwesomeIcon
                       icon={expandedName === entry.name ? faChevronUp : faChevronDown}
                       className="ml-2"
-                    />
-                  </td>
+                    /></td>
                   <td className="border px-2 md:px-4 py-2 text-sm md:text-base">{entry.class}</td>
                   <td className="border px-2 md:px-4 py-2 text-sm md:text-base">{entry.countIzin}</td>
                   <td className="border px-2 md:px-4 py-2 text-sm md:text-base">{entry.countSakit}</td>
-                  {/* <td className="border px-2 md:px-4 py-2 text-sm md:text-base">{entry.keterangan}</td> */}
                   <td className="border px-2 md:px-4 py-2 text-sm md:text-base">{formatDate(entry.submittedAt)}</td>
                 </tr>
                 {expandedName === entry.name && (
@@ -218,6 +306,44 @@ const FkisListPage = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Modal for confirmation and secret key */}
+      {isModalOpen && (
+  <div className="fixed inset-0 flex items-center justify-center z-50">
+    <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+    <div className="relative bg-white p-8 rounded shadow-lg w-full max-w-sm mx-auto">
+      <h2 className="text-xl font-semibold mb-4">Confirm Delete All Data</h2>
+      <p className="mb-4">Please enter the secret key to confirm deletion:</p>
+      <input
+        type="password"
+        value={secretKey}
+        onChange={(e) => setSecretKey(e.target.value)}
+        className="bg-gray-200 border rounded w-full py-2 px-3 mb-4"
+      />
+      {failedAttempts > 0 && (
+  <p className="text-red-500 mb-4">
+    Incorrect secret key. Please try again.
+  </p>
+)}
+
+      <div className="flex justify-end space-x-4">
+        <button
+          onClick={() => setIsModalOpen(false)}
+          className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleDumpAll}
+          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Delete All
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

@@ -28,7 +28,7 @@ const FkisPage = () => {
   const [anggota, setAnggota] = useState<Anggota[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [loading, setLoading] = useState<boolean>(false); // Add loading state
+  const [loading, setLoading] = useState<boolean>(false);
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [selectedNameId, setSelectedNameId] = useState<string | null>(null);
   const [newName, setNewName] = useState<string>("");
@@ -36,6 +36,8 @@ const FkisPage = () => {
   const [keterangan, setKeterangan] = useState<string>("");
   const [izinSakit, setIzinSakit] = useState<"izin" | "sakit" | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
+  const [showBlinking, setShowBlinking] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>(""); // New state for search query
 
   const router = useRouter();
 
@@ -44,10 +46,9 @@ const FkisPage = () => {
       try {
         const [anggotaResponse, kehadiranResponse] = await Promise.all([
           axios.get("/api"),
-          axios.get("/api/fkis")
+          axios.get("/api/fkis"),
         ]);
 
-        // Combine names from both sources, ensuring no duplicates by using a Map
         const combinedMap = new Map();
 
         anggotaResponse.data.data.forEach((item: Anggota) => {
@@ -60,7 +61,6 @@ const FkisPage = () => {
           }
         });
 
-        // Convert Map back to an array
         const combinedData = Array.from(combinedMap.values());
         setAnggota(combinedData);
       } catch (err) {
@@ -84,12 +84,25 @@ const FkisPage = () => {
   };
 
   const handleAddName = () => {
-    if (newName && !anggota.some(member => member.name === newName)) {
+    if (newName && !anggota.some((member) => member.name === newName)) {
       const newMemberId = Date.now().toString() + Math.random();
-      setAnggota([...anggota, { _id: newMemberId, name: newName, phoneNumber: "", class: "", agreement: "", alasan: "", eskul: "", __v: 0 }]);
+      setAnggota([
+        ...anggota,
+        {
+          _id: newMemberId,
+          name: newName,
+          phoneNumber: "",
+          class: "",
+          agreement: "",
+          alasan: "",
+          eskul: "",
+          __v: 0,
+        },
+      ]);
       setSelectedName(newName);
       setSelectedNameId(newMemberId);
       setNewName("");
+      setShowBlinking(false);
     }
   };
 
@@ -102,8 +115,13 @@ const FkisPage = () => {
   };
 
   const handleSubmit = async () => {
+    if (!selectedNameId) {
+      setShowBlinking(true);
+      return;
+    }
+
     if (selectedNameId && izinSakit && keterangan) {
-      setLoading(true); // Set loading to true
+      setLoading(true);
       swal({
         title: "Submitting...",
         text: "Please wait while we submit your form.",
@@ -126,15 +144,12 @@ const FkisPage = () => {
         Cookies.set("fkis_submitted", "true", { expires: 1 });
         setHasSubmitted(true);
 
-        // Show success swal
         swal({
-          title: "Pendaftaran Sukses",
-          text: "Terimakasih sudah mengikuti ekstrakurikuler KIR! Dan sudah berkontribusi dalam rangka peduli lingkungan!",
+          title: "Success!",
+          text: "Terimakasih sudah mengisi formulir fkis!",
           icon: "success",
-        })
-
+        });
       } catch (error) {
-        // Show error swal
         swal({
           title: "Error",
           text: "Telah terjadi error mohon hubungi kontak/instagram @inkirdible",
@@ -142,19 +157,33 @@ const FkisPage = () => {
         });
         setError("Failed to submit data");
       } finally {
-        setLoading(false); // Reset loading state
+        setLoading(false);
       }
     } else {
       setError("Please fill out all fields.");
     }
   };
 
+  const filteredAnggota = anggota.filter((member) =>
+    member.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (hasSubmitted) {
-    return <div className="max-w-xl mx-auto p-6 text-center">You have already submitted the form. Please come back later.</div>;
+    return (
+      <div className="max-w-xl mx-auto p-6 text-center">
+        You have already submitted the form. Please come back later.
+      </div>
+    );
   }
 
-  if (isLoading) return <div className="max-w-xl mx-auto p-6 text-center">Loading...</div>;
-  if (error) return <div className="max-w-xl mx-auto p-6 text-center text-red-500">{error}</div>;
+  if (isLoading)
+    return <div className="max-w-xl mx-auto p-6 text-center">Loading...</div>;
+  if (error)
+    return (
+      <div className="max-w-xl mx-auto p-6 text-center text-red-500">
+        {error}
+      </div>
+    );
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -166,13 +195,24 @@ const FkisPage = () => {
         style={{ backgroundColor: "#383433" }}
         className="mx-auto my-5 rounded-full aspect-square object-contain"
       />
-      <h1 className="text-3xl font-bold mb-6 text-center">Formulir Keterangan Izin/Sakit</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Formulir Keterangan Izin/Sakit
+      </h1>
+      <p className="text-center mb-8">Formulir ini dikhususkan untuk kamu yang memang sedang memiliki keperluan yang lebih penting.</p>
 
       {/* Name Selection */}
       <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-3">Pilih Nama:</h2>
-        <div className="space-y-2">
-          {anggota.map((member) => (
+        <h2 className="text-lg font-semibold mb-2">Pilih Nama:</h2>
+        <p className="text-left mb-4 text-sm text-gray-600">Pada saat menambah nama, nama akan selalu berada dibawah, pastikan untuk memilihnya terlebih dahulu!</p>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Cari Nama..."
+          className="border p-2 mb-4 w-full rounded"
+        />
+        <div className="space-y-2 max-h-40 overflow-y-auto">
+          {filteredAnggota.map((member) => (
             <label key={member._id} className="flex items-center">
               <input
                 type="checkbox"
@@ -194,7 +234,11 @@ const FkisPage = () => {
           />
           <button
             onClick={handleAddName}
-            className="bg-blue-500 text-white px-4 py-2 rounded-r"
+            className={`${
+              showBlinking
+                ? "animate-blink bg-blue-500 text-red-500 text-white"
+                : "bg-blue-500 text-white"
+            } px-4 py-2 rounded-r`}
             disabled={!newName}
           >
             Tambah
@@ -204,7 +248,26 @@ const FkisPage = () => {
         <div className="mt-4">
           <h2 className="text-lg font-semibold mb-3">Pilih Kelas:</h2>
           <div className="space-y-2">
-            {["X-1", "X-2", "X-3", "X-4", "X-5", "X-6", "XI-1", "XI-2", "XI-3", "XI-4", "XI-5", "XI-6"].map((kelas) => (
+            {[
+              "X-1",
+              "X-2",
+              "X-3",
+              "X-4",
+              "X-5",
+              "X-6",
+              "XI-1",
+              "XI-2",
+              "XI-3",
+              "XI-4",
+              "XI-5",
+              "XI-6",
+              "XII-1",
+              "XII-2",
+              "XII-3",
+              "XII-4",
+              "XII-5",
+              "XII-6",
+            ].map((kelas) => (
               <label key={kelas} className="flex items-center">
                 <input
                   type="checkbox"
@@ -219,21 +282,17 @@ const FkisPage = () => {
         </div>
       </div>
 
-      {/* Keterangan */}
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-3">Keterangan:</h2>
-        <textarea
-          value={keterangan}
-          onChange={(e) => setKeterangan(e.target.value)}
-          className="border p-3 w-full rounded"
-          rows={4}
-          placeholder="Masukkan keterangan..."
-        />
-      </div>
-
       {/* Izin/Sakit Selection */}
+      
       <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-3">Status:</h2>
+      <h2 className="text-lg font-semibold">Alasan:</h2>
+          <textarea
+            className="border p-2 w-full rounded mt-3"
+            value={keterangan}
+            onChange={(e) => setKeterangan(e.target.value)}
+            placeholder="Alasan"
+          />
+        <h2 className="text-lg font-semibold mb-3">Keterangan:</h2>
         <div className="space-y-2">
           <label className="flex items-center">
             <input
@@ -256,11 +315,12 @@ const FkisPage = () => {
         </div>
       </div>
 
-      {/* Submit Button */}
       <button
         onClick={handleSubmit}
-        className="w-full bg-blue-600 text-white py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition duration-200"
-        disabled={loading} // Disable button while loading
+        className={`w-full py-3 rounded bg-blue-500 text-white font-semibold ${
+          loading ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+        disabled={loading}
       >
         Submit
       </button>
