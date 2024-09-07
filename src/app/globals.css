@@ -108,7 +108,15 @@ body {
   box-shadow: 2px 2px #000;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
+  /* Grayscale on disabled */
+  @apply disabled:filter disabled:grayscale;
 }
+
+.pixel-button-d:hover:enabled {
+  transform: translateY(-2px);
+  box-shadow: 4px 4px #000;
+}
+
 .pixel-button-d:hover {
   transform: translateY(-2px);
   box-shadow: 4px 4px #000;

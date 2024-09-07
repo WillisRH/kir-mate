@@ -192,7 +192,7 @@ const FkisListPage = () => {
     }
   };
 
-  if (isLoading) return <div className="text-center">Loading...</div>;
+  if (isLoading) return <div className="container mx-auto px-4 py-8 relative flex flex-col items-center justify-center min-h-screen">Loading...</div>;
   if (error) return <div className="text-center text-red-500">{error}</div>;
   if (hasFailed) {
     return (
@@ -282,7 +282,7 @@ const FkisListPage = () => {
                   <tr>
                     <td colSpan={6} className="bg-gray-100">
                       <div className="p-4">
-                        <h3 className="text-lg font-semibold">Detailed Reasons</h3>
+                        <h3 className="text-lg font-semibold">{entry.name}</h3>
                         <div className="text-sm mb-4 mt-2 text-gray-600">
                               <div><strong>IZIN:</strong> {entry.countIzin}</div>
                               <div><strong>SAKIT:</strong> {entry.countSakit}</div>

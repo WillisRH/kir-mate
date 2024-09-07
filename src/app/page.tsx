@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import logo from '@/public/logo.png';
+import logofull from '@/public/logofull.png';
 import uneso from '@/public/uneso.png';
 import kir from '@/public/kir.png';
 import { ToastContainer, toast } from 'react-toastify';
@@ -29,6 +30,7 @@ export default function Home() {
   const router = useRouter();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [counter, setCounter] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleNextImage = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -58,7 +60,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    document.body.style.height = '420vh';
+    document.body.style.height = '500vh';
 
     const checkScrollSpeed = (function(settings: { delay?: number } = {}) {
       let lastPos: number | null = null, newPos: number, timer: NodeJS.Timeout, delta = 0;
@@ -127,20 +129,21 @@ export default function Home() {
 
     
 
-  const fetchData = async () => {
-    try {
-      const response = await axios.get("/api");
-      const data = response.data.data;
+    const fetchData = async () => {
+      setIsLoading(true); // Set loading state to true before fetching data
+      try {
+        const response = await axios.get('/api'); // Fetch data from API
+        const data = response.data.data;
 
-
-      // Set the counter to the length of the data
-      setCounter(data.length);
-    } catch (err) {
-      // Handle the error here
-    } finally {
-      // Do any final operations here
-    }
-  };
+        // Set the counter to the length of the data
+        setCounter(data.length);
+ // Example value; replace with actual logic if needed
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      } finally {
+        setIsLoading(false); // Set loading state to false after fetching
+      }
+    };
 
 
     fetchData();
@@ -160,7 +163,7 @@ export default function Home() {
   };
 
 
-  const headers = ["APA ITU KIR?", "KEGIATAN KIR SMAN 12 JAKARTA", "CONTACT", "JOIN US"];
+  const headers = ["PENDAHULUAN", "KEGIATAN KIR SMAN 12 JAKARTA", "CONTACT", "JOIN US"];
   const pagesContent = [
     (
       <>
@@ -177,7 +180,7 @@ export default function Home() {
           </div>
           <h2 className="text-2xl font-bold mt-4">SEJARAH KIR</h2>
           <p className="text-gray-600">1963 - now</p>
-          <p className="mt-2 text-gray-700">
+          <p className="mt-2 text-gray-700 p-4">
           Youth Science Club (disingkat YSC) awalnya dibentuk bagi remaja yang berusia 12-18 tahun oleh UNESCO pada tahun 1963, tetapi pada tahun 1970 batasan usia tersebut diubah menjadi 12-21 tahun. <br></br><br></br>Di Indonesia, Youth Science Club dikenal dengan nama Kelompok Ilmiah Remaja yang terbentuk atas inisiatif remaja Indonesia itu sendiri. Pembentukannya diawali pada tahun 1969 saat koran Harian Berita Yudha membentuk Remaja Yudha Club (RYC). <br></br><br></br>Selanjutnya, setelah difasilitasi oleh LIPI dan mengalami perkembangan, maka Remaja Yudha Club (RYC) berubah menjadi Kelompok Ilmiah Remaja. Istilah ini masih digunakan hingga saat ini, dan masih aktif dilaksanakan di berbagai sekolah di seluruh Indonesia. Kelompok Ilmiah Remaja pertama dan tertua di Indonesia adalah Kelompok Ilmiah Remaja Jakarta Utara (KIRJU) yang berdiri sejak 11 Maret 1982. Sekretariat KIRJU berada di Gedung Auditorium lantai 2 Gelanggang Remaja Jakarta Utara.
           </p>  
         </article>
@@ -195,7 +198,7 @@ export default function Home() {
               />
               <h3 className="text-xl font-bold mt-4">Apa itu KIR</h3>
               <p className="text-gray-600">2023</p>
-              <p className="mt-2 text-gray-700">
+              <p className="mt-2 text-gray-700 p-4">
               Kelompok Ilmiah Remaja (KIR) adalah kegiatan ekstrakurikuler di sekolah yang terbuka bagi para remaja yang ingin mengembangkan kreativitas, ilmu pengetahuan, dan teknologi.
               <br></br> <br></br>
               Anggota KIR diharapkan menerapkan sikap ilmiah, jujur dalam memecahkan masalah, memiliki kepekaan yang tinggi, dan menggunakan metode yang sistematis, objektif, rasional, dan berprosedur. KIR bertujuan untuk mengembangkan kompetensi pengembangan diri dalam kehidupan.
@@ -206,7 +209,7 @@ export default function Home() {
             </div>
             <div>
               <Image
-                src={logo}
+                src={logofull}
                 alt="Article image"
                 width={600}
                 height={400}
@@ -214,7 +217,7 @@ export default function Home() {
               />
               <h3 className="text-xl font-bold mt-4">Apa itu INKIRDIBLE</h3>
               <p className="text-gray-600">2023</p>
-              <p className="mt-2 text-gray-700">
+              <p className="mt-2 text-gray-700 p-4">
               INKIRDIBLE, singkatan dari Inovatif, Kreatif, dan Inspiratif, merupakan ekstrakurikuler (ekskul) Kelompok Ilmiah Remaja (KIR) di SMAN 12 Jakarta. Ekskul ini didirikan dengan tujuan untuk menumbuhkan minat dan bakat siswa dalam bidang sains dan teknologi, serta mendorong kamu untuk menjadi generasi muda yang inovatif dan kreatif.
               <br></br> <br></br>
               Di INKIRDIBLE, kalian tidak hanya mempelajari teori sains dan teknologi secara mendalam, tetapi juga dilibatkan dalam berbagai kegiatan praktikum dan penelitian yang menarik. Hal ini memungkinkan kamu untuk menerapkan pengetahuannya secara langsung dan mengembangkan kemampuan problem solvingmu.
@@ -256,7 +259,7 @@ export default function Home() {
   ))}
 </div>
 
-<h1 className='mb-5'>
+<h1 className='mb-5 p-5'>
   Bosan dengan pelajaran di kelas yang monoton? Ingin merasakan sensasi belajar sambil bereksperimen dan berpetualang? KIR hadir untuk membantumu! Lebih dari sekadar ekstrakulikuler sains, KIR adalah wadah untuk mengembangkan kreativitas, inovasi, dan kepemimpinanmu. Berikut ini adalah potret keseruan kegiatan dalam eskul KIR!
 </h1>
 
@@ -285,11 +288,11 @@ export default function Home() {
   </div>
 </div>
 
-<p className="mt-12 lg:mt-16 text-xl md:text-2xl text-black z-10 transition-transform">
+<p className="mt-12 lg:mt-16 text-xl md:text-2xl text-black z-10 transition-transform p-2 text-center">
   {images[currentImageIndex].description}
 </p>
 
-          <h1 className='mt-8'>Ayo Tunggu Apalagi, Hey Kamu Scientist!
+          <h1 className='mt-8 p-4'>Ayo Tunggu Apalagi, Hey Kamu Scientist!
           Dunia menanti ide-ide brilianmu! Di KIR, kamu akan menemukan ruang untuk mengembangkan bakat dan minatmumu di bidang sains, teknologi, dan penelitian.</h1>
         
         
@@ -327,10 +330,11 @@ L
     (
       <>
       <div className="flex flex-col items-center justify-center slide-in-bottom">
-        <p className="slide-in-bottom">Ayo ikut berkontribusi dengan mengikuti eskul KIR, dimana tempat kita dapat belajar bersama-sama akan pentingnya alam di sekitar kita</p>
+        <p className="slide-in-bottom text-center p-4">Ayo ikut berkontribusi dengan mengikuti eskul KIR, dimana tempat kita dapat belajar bersama-sama akan pentingnya alam di sekitar kita</p>
         <button
           onClick={() => router.push('/daftar')}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded pixel-button "
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded pixel-button disabled:cursor-not-allowed"
+          disabled={true}
         >
           Daftar Sekarang
         </button>
@@ -359,18 +363,21 @@ L
     <div className="container mx-auto px-4 py-8 relative flex flex-col items-center justify-center min-h-screen">
       <header className={`text-center mb-8 transition-transform duration-1000 ease-in-out ${isContentVisible ? 'translate-y-[15px]' : 'centered-content'}`}>
         <div className="slide-in-bottom">
-          <h1 className="text-5xl font-bold">
+          <h1 className="text-5xl font-bold p-4 ">
             {isContentVisible ? (currentPage >= 0 && currentPage < headers.length ? headers[currentPage] : "AYO JOIN KIR") : "KIR SMAN 12 JAKARTA TIMUR"}
           </h1>
           {!isContentVisible && (
             <p className="text-sm text-gray-500 text-xl">Surat terbuka untuk kalian, calon scientist!</p>
           )}
           {!isContentVisible && (
-            <p className="mt-4 p-4 bg-gray-100 shadow-lg rounded text-center text-sm">
-            Ayo bergabung dengan <span className="underline">{counter + angkatan_sekarang}</span> anggota lainnya!
-          </p>
-          )}
-
+        <p className="mt-4 p-4 bg-gray-100 shadow-lg rounded text-center text-sm">
+          Ayo bergabung dengan{' '}
+          <span className="underline">
+            {isLoading ? '(loading)' : counter + angkatan_sekarang}
+          </span>{' '}
+          anggota lainnya!
+        </p>
+      )}
           {!isContentVisible && showEmojis && (
             <button
               onClick={handleClick}
@@ -382,7 +389,8 @@ L
           {!isContentVisible && (
             <button
               onClick={() => router.push('/daftar')}
-              className="mt-4 px-4 py-2 bg-green-500 text-white rounded pixel-button-d"
+              className="mt-4 px-4 py-2 bg-green-500 text-white rounded pixel-button-d disabled:cursor-not-allowed"
+              disabled={true}
             >
               Daftar Sekarang
             </button>
@@ -418,7 +426,7 @@ L
         <div className="fixed bottom-4 flex justify-between items-center w-full px-4">
           <button
             onClick={handlePrevious}
-            className="px-4 py-2 bg-gray-500 text-white rounded"
+            className="px-4 py-2 bg-gray-500 text-white rounded disabled:cursor-not-allowed"
             disabled={currentPage === 0}
           >
             &lt;&lt;
@@ -426,14 +434,14 @@ L
           <p className="px-4 py-2 text-center bg-gray-500 text-white rounded">{currentPage + 1} / {headers.length}</p>
           <button
             onClick={handleNext}
-            className="px-4 py-2 bg-gray-500 text-white rounded"
+            className="px-4 py-2 bg-gray-500 text-white rounded disabled:cursor-not-allowed"
             disabled={currentPage === headers.length - 1}
           >
             &gt;&gt;
           </button>
         </div>
       )}
-      <div className={`fixed ${isContentVisible ? 'bottom-16' : 'bottom-2'} left-4 bg-white p-2 rounded shadow`}>
+      {/* <div className={`fixed ${isContentVisible ? 'bottom-16' : 'bottom-2'} left-4 bg-white p-2 rounded shadow`}> */}
   {/* {scrollSpeed > 20 ? (
     <p style={{ color: 'red' }}>You're scrolling too fast!</p>
   ) : (
@@ -441,7 +449,7 @@ L
       Scroll Velocity: {scrollSpeed.toFixed(2)} px/ms
     </p>
   )} */}
-</div>
+{/* </div> */}
 
 
       <ToastContainer />
